@@ -1,0 +1,4 @@
+sessao {
+  a = 2 + 3 * 4;
+  resultado(a);
+} fim_sessao

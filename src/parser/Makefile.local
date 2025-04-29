@@ -1,0 +1,31 @@
+# Makefile local para compilação direta no diretório src/parser
+
+CC = gcc
+CFLAGS = -Wall -g
+BISON = bison
+FLEX = flex
+
+all: fisio
+
+fisio: parser.tab.c lex.yy.c vm_stub.o
+	$(CC) $(CFLAGS) -o $@ $^
+
+parser.tab.c parser.tab.h: parser.y
+	$(BISON) -d $<
+
+lex.yy.c: lexer.l parser.tab.h
+	$(FLEX) $<
+
+vm_stub.o: vm_stub.c
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	rm -f parser.tab.c parser.tab.h lex.yy.c vm_stub.o fisio
+
+run: fisio
+	./fisio
+
+test: fisio
+	./fisio < test1.fisio
+
+.PHONY: all clean run test

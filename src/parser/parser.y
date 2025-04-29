@@ -2,132 +2,123 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int yylex(void);
+
+// Funções do VM stub
+extern void init_vm();
+extern void set_variable(const char* name, int value);
+extern int get_variable(const char* name);
+extern void print_resultado(int value);
+extern void print_resultado_var(const char* name);
+
+int yylex();
 void yyerror(const char *s);
+extern FILE *yyin;
 %}
 
-/* Valores possíveis para yylval */
 %union {
-  int int_val;
-  int bool_val;
-  char *str_val;
-  char *id;
+    int num;
+    char id[50];
 }
 
-/* Tokens */
-%token SESSAO FIM_SESSAO PACIENTE IMPORTAR_DADOS SE MELHOROU CASO CONTRARIO
-%token TREINO PRACTICAR_ATE RESULTADO PAUSA REGISTRAR
-%token <int_val> INTEGER
-%token <bool_val> BOOL
-%token <str_val> STRING
-%token <id> IDENTIFIER
-%token EQ NEQ LT LTE GT GTE AND OR NOT
-%token PLUS MINUS MULT DIV ASSIGN
-%token SEMICOLON COMMA LPAREN RPAREN LBRACE RBRACE
+%token SESSAO FIM_SESSAO
+%token RESULTADO
+%token <num> NUM
+%token <id> ID
+%token ASSIGN
 
-%start program
+%left '+' '-'
+%left '*' '/'
+
+%type <num> expr
 
 %%
 
-program:
-    SESSAO block FIM_SESSAO
-      { puts("Programa FisioLang analisado com sucesso."); }
-  ;
+programa: SESSAO '{' statements '}' FIM_SESSAO
+    {
+        printf("Programa FisioLang analisado com sucesso.\n");
+    }
+    ;
 
-block:
-    LBRACE statements RBRACE
-  ;
+statements: statements statement
+    | statement
+    ;
 
-statements:
-    /* vazio */
-  | statements statement
-  ;
+statement: ID ASSIGN expr ';'
+    {
+        set_variable($1, $3);
+    }
+    | RESULTADO '(' ID ')' ';'
+    {
+        print_resultado_var($3);
+    }
+    | RESULTADO '(' expr ')' ';'
+    {
+        print_resultado($3);
+    }
+    ;
 
-statement:
-    paciente_stmt
-  | importar_stmt
-  | IDENTIFIER ASSIGN expression SEMICOLON     /* atribuição implícita */
-  | if_stmt
-  | loop_stmt
-  | print_stmt
-  | pause_stmt
-  | registrar_stmt
-  | SEMICOLON
-  ;
-
-paciente_stmt:
-    PACIENTE LBRACE paciente_info_list RBRACE
-  ;
-
-paciente_info_list:
-    /* vazio */
-  | paciente_info_list IDENTIFIER ASSIGN expression SEMICOLON
-  ;
-
-importar_stmt:
-    IMPORTAR_DADOS LPAREN STRING RPAREN SEMICOLON
-  ;
-
-if_stmt:
-    SE MELHOROU LPAREN expression RPAREN block
-  | SE MELHOROU LPAREN expression RPAREN block CASO CONTRARIO block
-  ;
-
-loop_stmt:
-    TREINO LPAREN expression RPAREN block
-  | PRACTICAR_ATE LPAREN expression RPAREN block
-  ;
-
-print_stmt:
-    RESULTADO LPAREN expression RPAREN SEMICOLON
-  ;
-
-pause_stmt:
-    PAUSA LPAREN expression RPAREN SEMICOLON
-  ;
-
-registrar_stmt:
-    REGISTRAR LPAREN expression COMMA expression RPAREN SEMICOLON
-  ;
-
-/* Expressões aritméticas e lógicas */
-expression:
-    additive_expr
-  ;
-
-additive_expr:
-    multiplicative_expr
-  | additive_expr PLUS multiplicative_expr
-  | additive_expr MINUS multiplicative_expr
-  ;
-
-multiplicative_expr:
-    unary_expr
-  | multiplicative_expr MULT unary_expr
-  | multiplicative_expr DIV unary_expr
-  ;
-
-unary_expr:
-    primary
-  | NOT unary_expr
-  | PLUS unary_expr
-  | MINUS unary_expr
-  ;
-
-primary:
-    INTEGER
-  | BOOL
-  | STRING
-  | IDENTIFIER
-  | LPAREN expression RPAREN
-  ;
+expr: NUM
+    {
+        $$ = $1;
+    }
+    | ID
+    {
+        $$ = get_variable($1);
+    }
+    | expr '+' expr
+    {
+        $$ = $1 + $3;
+    }
+    | expr '-' expr
+    {
+        $$ = $1 - $3;
+    }
+    | expr '*' expr
+    {
+        $$ = $1 * $3;
+    }
+    | expr '/' expr
+    {
+        if ($3 == 0) {
+            yyerror("Divisão por zero");
+            $$ = 0;
+        } else {
+            $$ = $1 / $3;
+        }
+    }
+    | '(' expr ')'
+    {
+        $$ = $2;
+    }
+    ;
 
 %%
+
+int main(int argc, char *argv[]) {
+    // Inicializar a VM
+    init_vm();
+    
+    // Se um arquivo foi especificado como argumento
+    if (argc > 1) {
+        FILE *file = fopen(argv[1], "r");
+        if (!file) {
+            fprintf(stderr, "Não foi possível abrir o arquivo %s\n", argv[1]);
+            return 1;
+        }
+        yyin = file;
+    }
+    
+    // Analisar a entrada
+    yyparse();
+    
+    // Fechar o arquivo se foi aberto
+    if (argc > 1) {
+        fclose(yyin);
+    }
+    
+    return 0;
+}
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Erro de sintaxe: %s\\n", s);
-}
-
-int main(void) {
-    return yyparse();
+    fprintf(stderr, "Erro de análise: %s\n", s);
 }
