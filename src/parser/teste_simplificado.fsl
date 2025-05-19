@@ -1,0 +1,39 @@
+sessao {
+  /* Programa de teste básico da FisioLang */
+  
+  /* Variáveis simples */
+  x = 10;
+  y = 20;
+  
+  /* Exibição de resultados */
+  resultado(x + y);
+  
+  /* Condicionais */
+  se melhorou(x > 5) {
+    resultado(100);
+  } caso contrario {
+    resultado(200);
+  }
+  
+  /* Importação de dados */
+  importar_dados("physical_therapy_exercises.csv");
+  
+  /* Leitura de sensor */
+  valor = ler_sensor("amplitude");
+  resultado(valor);
+  
+  /* Função de melhora aleatória */
+  m = melhora();
+  resultado(m);
+  
+  /* Cálculo de consultas */
+  total = calcular_consultas(x, y, 5);
+  resultado(total);
+  
+  /* Registrar valores */
+  registrar(m, valor);
+  
+  /* Pausa */
+  pausa(2);
+}
+fim_sessao

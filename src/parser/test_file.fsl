@@ -1,0 +1,34 @@
+sessao {
+  paciente {
+    peso = 75;
+    altura = 170;
+    lesao = "ombro";
+    sexo = "F";
+    sessoes = 10;
+  }
+
+  importar_dados("physical_therapy_exercises.csv");
+
+  x = 30;
+  resultado(x);
+
+  se melhorou(x > 20) {
+    x = x - 5;
+  } caso contrario {
+    x = x + 5;
+  }
+
+  treino(x > 0) {
+    resultado(x);
+    x = x - 1;
+  }
+
+  praticar_ate(melhorou() >= 80) {
+    pausa(5);
+    registrar(ler_sensor("accel_x"), ler_sensor("accel_y"));
+  }
+
+  consultas = calcular_consultas(peso, altura, sessoes);
+  resultado(consultas);
+}
+fim_sessao

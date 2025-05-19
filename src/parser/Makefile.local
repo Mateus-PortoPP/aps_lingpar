@@ -4,28 +4,35 @@ CC = gcc
 CFLAGS = -Wall -g
 BISON = bison
 FLEX = flex
+TARGET = fisio
 
-all: fisio
+all: $(TARGET)
 
-fisio: parser.tab.c lex.yy.c vm_stub.o
+$(TARGET): parser.tab.o lex.yy.o vm_stub.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 parser.tab.c parser.tab.h: parser.y
 	$(BISON) -d $<
 
+parser.tab.o: parser.tab.c
+	$(CC) $(CFLAGS) -c $<
+
 lex.yy.c: lexer.l parser.tab.h
 	$(FLEX) $<
+
+lex.yy.o: lex.yy.c
+	$(CC) $(CFLAGS) -c $<
 
 vm_stub.o: vm_stub.c
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f parser.tab.c parser.tab.h lex.yy.c vm_stub.o fisio
+	rm -f parser.tab.c parser.tab.h lex.yy.c *.o $(TARGET)
 
-run: fisio
-	./fisio
+test1: $(TARGET)
+	./$(TARGET) < test1.fisio
 
-test: fisio
-	./fisio < test1.fisio
+test2: $(TARGET)
+	./$(TARGET) < test2.fisio
 
-.PHONY: all clean run test
+.PHONY: all clean test1 test2

@@ -1,0 +1,10 @@
+sessao {
+    x = 5;
+    resultado(x * 2);
+
+    treino(x > 0) {
+        resultado(x);
+        x = x - 1;
+    }
+}
+fim_sessao

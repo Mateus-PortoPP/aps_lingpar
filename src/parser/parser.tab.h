@@ -54,43 +54,30 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    SESSAO = 258,                  /* SESSAO  */
-    FIM_SESSAO = 259,              /* FIM_SESSAO  */
-    PACIENTE = 260,                /* PACIENTE  */
-    IMPORTAR_DADOS = 261,          /* IMPORTAR_DADOS  */
-    SE = 262,                      /* SE  */
-    MELHOROU = 263,                /* MELHOROU  */
-    CASO = 264,                    /* CASO  */
-    CONTRARIO = 265,               /* CONTRARIO  */
-    TREINO = 266,                  /* TREINO  */
-    PRACTICAR_ATE = 267,           /* PRACTICAR_ATE  */
-    RESULTADO = 268,               /* RESULTADO  */
-    PAUSA = 269,                   /* PAUSA  */
-    REGISTRAR = 270,               /* REGISTRAR  */
-    INTEGER = 271,                 /* INTEGER  */
-    BOOL = 272,                    /* BOOL  */
-    STRING = 273,                  /* STRING  */
-    IDENTIFIER = 274,              /* IDENTIFIER  */
-    EQ = 275,                      /* EQ  */
-    NEQ = 276,                     /* NEQ  */
-    LT = 277,                      /* LT  */
-    LTE = 278,                     /* LTE  */
-    GT = 279,                      /* GT  */
-    GTE = 280,                     /* GTE  */
-    AND = 281,                     /* AND  */
-    OR = 282,                      /* OR  */
-    NOT = 283,                     /* NOT  */
-    PLUS = 284,                    /* PLUS  */
-    MINUS = 285,                   /* MINUS  */
-    MULT = 286,                    /* MULT  */
-    DIV = 287,                     /* DIV  */
-    ASSIGN = 288,                  /* ASSIGN  */
-    SEMICOLON = 289,               /* SEMICOLON  */
-    COMMA = 290,                   /* COMMA  */
-    LPAREN = 291,                  /* LPAREN  */
-    RPAREN = 292,                  /* RPAREN  */
-    LBRACE = 293,                  /* LBRACE  */
-    RBRACE = 294                   /* RBRACE  */
+    IDENTIFIER = 258,              /* IDENTIFIER  */
+    STRING = 259,                  /* STRING  */
+    INTEGER = 260,                 /* INTEGER  */
+    SESSAO = 261,                  /* SESSAO  */
+    FIM_SESSAO = 262,              /* FIM_SESSAO  */
+    PACIENTE = 263,                /* PACIENTE  */
+    IMPORTAR = 264,                /* IMPORTAR  */
+    SE = 265,                      /* SE  */
+    MELHOROU = 266,                /* MELHOROU  */
+    CASO = 267,                    /* CASO  */
+    CONTRARIO = 268,               /* CONTRARIO  */
+    TREINO = 269,                  /* TREINO  */
+    PRACTICAR = 270,               /* PRACTICAR  */
+    RESULTADO = 271,               /* RESULTADO  */
+    PAUSA = 272,                   /* PAUSA  */
+    REGISTRAR = 273,               /* REGISTRAR  */
+    LER_SENSOR = 274,              /* LER_SENSOR  */
+    CALCULAR = 275,                /* CALCULAR  */
+    LE = 276,                      /* LE  */
+    GE = 277,                      /* GE  */
+    EQ = 278,                      /* EQ  */
+    NE = 279,                      /* NE  */
+    AND = 280,                     /* AND  */
+    OR = 281                       /* OR  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -99,14 +86,13 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 10 "parser.y"
+#line 18 "parser.y"
 
-  int int_val;
-  int bool_val;
-  char *str_val;
-  char *id;
+    AST   *ast;
+    int    intval;
+    char  *str;
 
-#line 110 "parser.tab.h"
+#line 96 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

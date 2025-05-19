@@ -1,124 +1,160 @@
+/* parser.y */
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include "ast.h"
 
-// Funções do VM stub
-extern void init_vm();
-extern void set_variable(const char* name, int value);
-extern int get_variable(const char* name);
-extern void print_resultado(int value);
-extern void print_resultado_var(const char* name);
-
-int yylex();
-void yyerror(const char *s);
+extern int  yylex();
 extern FILE *yyin;
+extern int  yylineno;
+AST *ast_root;
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Erro de sintaxe (linha %d): %s\n", yylineno, s);
+    exit(1);
+}
 %}
 
 %union {
-    int num;
-    char id[50];
+    AST   *ast;
+    int    intval;
+    char  *str;
 }
 
-%token SESSAO FIM_SESSAO
-%token RESULTADO
-%token <num> NUM
-%token <id> ID
-%token ASSIGN
+%token <str>    IDENTIFIER STRING
+%token <intval> INTEGER
 
-%left '+' '-'
-%left '*' '/'
+%token SESSAO FIM_SESSAO PACIENTE IMPORTAR SE MELHOROU CASO CONTRARIO
+%token TREINO PRACTICAR RESULTADO PAUSA REGISTRAR LER_SENSOR CALCULAR
+%token LE GE EQ NE AND OR
 
-%type <num> expr
+%type <ast> program block stmts stmt expr arg_list
 
 %%
 
-programa: SESSAO '{' statements '}' FIM_SESSAO
-    {
-        printf("Programa FisioLang analisado com sucesso.\n");
-    }
+program:
+      SESSAO block FIM_SESSAO  { ast_root = $2; }
     ;
 
-statements: statements statement
-    | statement
+block:
+      '{' stmts '}'           { $$ = $2; }
     ;
 
-statement: ID ASSIGN expr ';'
-    {
-        set_variable($1, $3);
-    }
-    | RESULTADO '(' ID ')' ';'
-    {
-        print_resultado_var($3);
-    }
-    | RESULTADO '(' expr ')' ';'
-    {
-        print_resultado($3);
-    }
+stmts:
+      /* vazio */             { $$ = new_node(NODE_BLOCK); }
+    | stmts stmt              { ast_add_child($1,$2); $$ = $1; }
     ;
 
-expr: NUM
-    {
-        $$ = $1;
-    }
-    | ID
-    {
-        $$ = get_variable($1);
-    }
-    | expr '+' expr
-    {
-        $$ = $1 + $3;
-    }
-    | expr '-' expr
-    {
-        $$ = $1 - $3;
-    }
-    | expr '*' expr
-    {
-        $$ = $1 * $3;
-    }
-    | expr '/' expr
-    {
-        if ($3 == 0) {
-            yyerror("Divisão por zero");
-            $$ = 0;
-        } else {
-            $$ = $1 / $3;
-        }
-    }
-    | '(' expr ')'
-    {
-        $$ = $2;
-    }
+stmt:
+      IDENTIFIER '=' expr ';' {
+          AST *n = new_node(NODE_ASSIGN);
+          n->text = $1;           /* pega ownership de $1 */
+          ast_add_child(n,$3);
+          $$ = n;
+      }
+    | PACIENTE '{' stmts '}'   {
+          AST *n = new_node(NODE_PACIENTE);
+          ast_add_child(n,$3);
+          $$ = n;
+      }
+    | IMPORTAR '(' STRING ')' ';' {
+          AST *n = new_node(NODE_IMPORT_DATA);
+          n->text = $3;           /* ownstring */
+          $$ = n;
+      }
+    | RESULTADO '(' expr ')' ';' {
+          AST *n = new_node(NODE_PRINT);
+          ast_add_child(n,$3);
+          $$ = n;
+      }
+    | PAUSA '(' expr ')' ';'   {
+          AST *n = new_node(NODE_PAUSE);
+          ast_add_child(n,$3);
+          $$ = n;
+      }
+    | REGISTRAR '(' expr ',' expr ')' ';' {
+          AST *n = new_node(NODE_REGISTER);
+          ast_add_child(n,$3);
+          ast_add_child(n,$5);
+          $$ = n;
+      }
+    | SE MELHOROU '(' expr ')' block CASO CONTRARIO block {
+          AST *n = new_node(NODE_IF);
+          ast_add_child(n,$4);
+          ast_add_child(n,$6);
+          ast_add_child(n,$9);
+          $$ = n;
+      }
+    | SE MELHOROU '(' expr ')' block {
+          AST *n = new_node(NODE_IF);
+          ast_add_child(n,$4);
+          ast_add_child(n,$6);
+          $$ = n;
+      }
+    | TREINO '(' expr ')' block {
+          AST *n = new_node(NODE_LOOP_TREINO);
+          ast_add_child(n,$3); ast_add_child(n,$5);
+          $$ = n;
+      }
+    | PRACTICAR '(' expr ')' block {
+          AST *n = new_node(NODE_LOOP_PRACTICAR);
+          ast_add_child(n,$3); ast_add_child(n,$5);
+          $$ = n;
+      }
+    ;
+
+expr:
+      INTEGER                  { $$ = new_int_node($1); }
+    | IDENTIFIER               {
+          AST *n = new_node(NODE_EXPR_VAR);
+          n->text = $1;         /* pega ownership de $1, sem duplicar */
+          $$ = n;
+      }
+    | expr '+' expr            { $$ = new_binop_node(AST_OP_ADD, $1, $3); }
+    | expr '-' expr            { $$ = new_binop_node(AST_OP_SUB, $1, $3); }
+    | expr '*' expr            { $$ = new_binop_node(AST_OP_MUL, $1, $3); }
+    | expr '/' expr            { $$ = new_binop_node(AST_OP_DIV, $1, $3); }
+    | expr EQ expr             { $$ = new_binop_node(AST_OP_EQ,  $1, $3); }
+    | expr NE expr             { $$ = new_binop_node(AST_OP_NE,  $1, $3); }
+    | expr '<' expr            { $$ = new_binop_node(AST_OP_LT,  $1, $3); }
+    | expr '>' expr            { $$ = new_binop_node(AST_OP_GT,  $1, $3); }
+    | expr LE expr             { $$ = new_binop_node(AST_OP_LE,  $1, $3); }
+    | expr GE expr             { $$ = new_binop_node(AST_OP_GE,  $1, $3); }
+    | MELHOROU '(' ')'         { $$ = new_node(NODE_MELHORA); }
+    | LER_SENSOR '(' STRING ')' {
+          AST *n = new_node(NODE_LER_SENSOR);
+          n->text = $3;
+          $$ = n;
+      }
+    | CALCULAR '(' arg_list ')' {
+          AST *n = new_node(NODE_CALC_CONSULTAS);
+          for (int i = 0; i < $3->n_children; i++)
+              ast_add_child(n, $3->children[i]);
+          free($3->children);
+          free($3);
+          $$ = n;
+      }
+    | '(' expr ')'             { $$ = $2; }
+    ;
+
+arg_list:
+      expr                     {
+          AST *n = new_node(NODE_BLOCK);
+          ast_add_child(n,$1);
+          $$ = n;
+      }
+    | arg_list ',' expr        {
+          ast_add_child($1,$3);
+          $$ = $1;
+      }
     ;
 
 %%
 
-int main(int argc, char *argv[]) {
-    // Inicializar a VM
-    init_vm();
-    
-    // Se um arquivo foi especificado como argumento
-    if (argc > 1) {
-        FILE *file = fopen(argv[1], "r");
-        if (!file) {
-            fprintf(stderr, "Não foi possível abrir o arquivo %s\n", argv[1]);
-            return 1;
-        }
-        yyin = file;
-    }
-    
-    // Analisar a entrada
+AST *parse_file(const char *path) {
+    yyin = fopen(path, "r");
+    if (!yyin) { perror("fopen"); exit(1); }
     yyparse();
-    
-    // Fechar o arquivo se foi aberto
-    if (argc > 1) {
-        fclose(yyin);
-    }
-    
-    return 0;
-}
-
-void yyerror(const char *s) {
-    fprintf(stderr, "Erro de análise: %s\n", s);
+    fclose(yyin);
+    return ast_root;
 }

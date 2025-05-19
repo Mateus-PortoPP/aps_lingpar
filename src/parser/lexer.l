@@ -1,47 +1,70 @@
+/* lexer.l */
 %{
-#include <stdio.h>
-#include <string.h>
+#include "ast.h"           /* garantir AST definido antes de parser.tab.h */
 #include "parser.tab.h"
-
-// Para copiar o identificador para yylval
-void copy_id() {
-    strcpy(yylval.id, yytext);
-}
+#include <stdlib.h>
+#include <string.h>
 %}
 
-%option noyywrap
+DIGIT   [0-9]
+LETTER  [a-zA-Z]
+ID      {LETTER}({LETTER}|{DIGIT}|_)*
+WS      [ \t\r\n]+
 
 %%
 
-[ \t\n]+        ; /* Ignora espaços em branco */
-"sessao"        { return SESSAO; }
-"fim_sessao"    { return FIM_SESSAO; }
-"resultado"     { return RESULTADO; }
-"="             { return ASSIGN; }
-";"             { return ';'; }
-"("             { return '('; }
-")"             { return ')'; }
-"{"             { return '{'; }
-"}"             { return '}'; }
-"+"             { return '+'; }
-"-"             { return '-'; }
-"*"             { return '*'; }
-"/"             { return '/'; }
+"sessao"             { return SESSAO; }
+"fim_sessao"         { return FIM_SESSAO; }
+"paciente"           { return PACIENTE; }
+"importar_dados"     { return IMPORTAR; }
+"se"                 { return SE; }
+"melhorou"           { return MELHOROU; }
+"caso"               { return CASO; }
+"contrario"          { return CONTRARIO; }
+"treino"             { return TREINO; }
+"praticar_ate"       { return PRACTICAR; }
+"resultado"          { return RESULTADO; }
+"pausa"              { return PAUSA; }
+"registrar"          { return REGISTRAR; }
+"ler_sensor"         { return LER_SENSOR; }
+"calcular_consultas" { return CALCULAR; }
 
-[0-9]+          { 
-                  yylval.num = atoi(yytext); 
-                  return NUM; 
-                }
+"<="                 { return LE; }
+">="                 { return GE; }
+"=="                 { return EQ; }
+"!="                 { return NE; }
+"&&"                 { return AND; }
+"||"                 { return OR; }
 
-[a-zA-Z][a-zA-Z0-9_]*  { 
-                  strcpy(yylval.id, yytext);
-                  return ID; 
-                }
+{DIGIT}+             { yylval.intval = atoi(yytext);    return INTEGER; }
+{ID}                 { yylval.str   = strdup(yytext); return IDENTIFIER; }
 
-.               { printf("Caractere não reconhecido: %c\n", *yytext); }
-
-%%
-
-int yywrap() {
-    return 1;
+\"([^\"\\]|\\.)*\"   {
+    int len = yyleng - 2;
+    yylval.str = malloc(len + 1);
+    strncpy(yylval.str, yytext+1, len);
+    yylval.str[len] = '\0';
+    return STRING;
 }
+
+{WS}+                { /* ignora espaços e quebras */ }
+
+"<"                  { return '<'; }
+">"                  { return '>'; }
+"="                  { return '='; }
+"+"                  { return '+'; }
+"-"                  { return '-'; }
+"*"                  { return '*'; }
+"/"                  { return '/'; }
+";"                  { return ';'; }
+","                  { return ','; }
+"{"                  { return '{'; }
+"}"                  { return '}'; }
+"("                  { return '('; }
+")"                  { return ')'; }
+
+.                    { return yytext[0]; }
+
+%%
+
+int yywrap(void) { return 1; }
