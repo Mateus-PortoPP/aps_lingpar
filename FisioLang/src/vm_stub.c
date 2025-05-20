@@ -36,7 +36,11 @@ static int var_index(const char *name) {
 /* Importa CSV, guarda em headers[] e data[][] */
 void import_data(const char *path) {
     FILE *f = fopen(path, "r");
-    if (!f) { perror("importar_dados"); exit(1); }
+    if (!f) { 
+        fprintf(stderr, "Erro ao importar dados do arquivo: %s\n", path);
+        fprintf(stderr, "Verifique se o caminho do arquivo está correto.\n"); 
+        return; // Retornar sem encerrar o programa
+    }
 
     char *line = NULL; size_t len = 0;
     if (getline(&line, &len, f) <= 0) {
@@ -58,9 +62,9 @@ void import_data(const char *path) {
         headers[c++] = strdup(tok);
         tok = strtok(NULL, ",\n");
     }
-    free(line);
-
-    /* lê dados */
+    free(line);    /* lê dados */
+    line = NULL;  // Resetar o ponteiro line para NULL antes de usar getline novamente
+    len = 0;      // Resetar o comprimento para 0
     while (1) {
         ssize_t rd = getline(&line, &len, f);
         if (rd <= 0) break;

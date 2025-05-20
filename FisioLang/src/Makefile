@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  = -Wall -g -fsanitize=address
+CFLAGS  = -Wall -g
 
 
 .PHONY: all run clean
@@ -25,7 +25,10 @@ vm_stub.o: vm_stub.c codegen.h ast.h
 	$(CC) $(CFLAGS) -c vm_stub.c
 
 run: fisio
-	./fisio test_file.fsl
+	./fisio ../examples/exemplo_fisio.fsl
+
+test: fisio
+	./fisio ../examples/teste_simplificado.fsl
 
 clean:
 	rm -f parser.tab.c parser.tab.h lex.yy.c fisio *.o

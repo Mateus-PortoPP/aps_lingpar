@@ -1,6 +1,6 @@
-/* lexer.l */
+
 %{
-#include "ast.h"           /* garantir AST definido antes de parser.tab.h */
+#include "ast.h"           
 #include "parser.tab.h"
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +28,22 @@ WS      [ \t\r\n]+
 "registrar"          { return REGISTRAR; }
 "ler_sensor"         { return LER_SENSOR; }
 "calcular_consultas" { return CALCULAR; }
+"melhora"            { return MELHOROU; } 
 
+"="                  { return '='; }
+"+"                  { return '+'; }
+"-"                  { return '-'; }
+"*"                  { return '*'; }
+"/"                  { return '/'; }
+";"                  { return ';'; }
+"("                  { return '('; }
+")"                  { return ')'; }
+"{"                  { return '{'; }
+"}"                  { return '}'; }
+","                  { return ','; }
+
+"<"                  { return '<'; }
+">"                  { return '>'; }
 "<="                 { return LE; }
 ">="                 { return GE; }
 "=="                 { return EQ; }
@@ -36,34 +51,20 @@ WS      [ \t\r\n]+
 "&&"                 { return AND; }
 "||"                 { return OR; }
 
-{DIGIT}+             { yylval.intval = atoi(yytext);    return INTEGER; }
-{ID}                 { yylval.str   = strdup(yytext); return IDENTIFIER; }
+{ID}                 { yylval.str = strdup(yytext); return IDENTIFIER; }
+{DIGIT}+             { yylval.intval = atoi(yytext); return INTEGER; }
+\"[^\"]*\"           { 
+                        char *s = strdup(yytext + 1); 
+                        s[strlen(s) - 1] = '\0';
+                        yylval.str = s;
+                        return STRING;
+                      }
 
-\"([^\"\\]|\\.)*\"   {
-    int len = yyleng - 2;
-    yylval.str = malloc(len + 1);
-    strncpy(yylval.str, yytext+1, len);
-    yylval.str[len] = '\0';
-    return STRING;
-}
+{WS}                 { /* ignorar espaços */ }
+\/\/[^\n]*           { /* ignorar comentários de linha */ }
+\/\*([^*]|\*+[^*/])*\*+\/ { /* ignorar comentários em bloco */ }
 
-{WS}+                { /* ignora espaços e quebras */ }
-
-"<"                  { return '<'; }
-">"                  { return '>'; }
-"="                  { return '='; }
-"+"                  { return '+'; }
-"-"                  { return '-'; }
-"*"                  { return '*'; }
-"/"                  { return '/'; }
-";"                  { return ';'; }
-","                  { return ','; }
-"{"                  { return '{'; }
-"}"                  { return '}'; }
-"("                  { return '('; }
-")"                  { return ')'; }
-
-.                    { return yytext[0]; }
+.                    { fprintf(stderr, "Caractere inesperado: %c\n", *yytext); }
 
 %%
 

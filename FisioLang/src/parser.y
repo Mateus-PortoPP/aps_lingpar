@@ -1,4 +1,4 @@
-/* parser.y */
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +14,9 @@ void yyerror(const char *s) {
     exit(1);
 }
 %}
+
+%debug
+%define parse.error verbose
 
 %union {
     AST   *ast;

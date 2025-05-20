@@ -1,4 +1,4 @@
-/* codegen.c */
+
 #include <stdlib.h>
 #include <string.h>
 #include "codegen.h"

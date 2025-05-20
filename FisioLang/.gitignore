@@ -1,0 +1,36 @@
+# Arquivos compilados
+*.o
+*.a
+*.so
+*.lo
+*.la
+fisio
+test_lexer
+clean_file
+
+# Arquivos gerados automaticamente
+parser.tab.c
+parser.tab.h
+lex.yy.c
+
+# Arquivos de backup
+*~
+*.bak
+*.swp
+*.tmp
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Arquivos específicos do VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# Logs e arquivos temporários
+*.log
+core.*

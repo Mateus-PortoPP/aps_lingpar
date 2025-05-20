@@ -1,0 +1,31 @@
+sessao {
+  /* Este é um comentário que será ignorado pelo compilador */
+  x = 10;
+  y = 20;
+ 
+  resultado(x + y);
+  
+  se melhorou(x > 5) {
+    resultado(100);
+  } caso contrario {
+    resultado(200);
+  }
+  
+  importar_dados("../examples/physical_therapy_exercises.csv");
+ 
+  s = ler_sensor("amplitude");
+  resultado(s);
+  
+  treino(x > 0) {
+    resultado(x);
+    x = x - 1;
+  }
+  
+  praticar_ate(y < 30) {
+    resultado(y);
+    y = y + 1;
+  }
+  
+  registrar(x, y);
+}
+fim_sessao
