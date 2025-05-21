@@ -1,0 +1,4 @@
+sessao {
+  resultado(42);
+}
+fim_sessao

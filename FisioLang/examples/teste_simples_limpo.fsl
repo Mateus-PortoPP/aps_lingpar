@@ -8,18 +8,22 @@ sessao {
   importar_dados("../examples/physical_therapy_exercises.csv");
   tempo = 30;
   resultado(tempo);
+  
   se melhorou(ler_sensor("amplitude") > 80) {
     tempo = tempo - 5;
   } caso contrario {
     tempo = tempo + 10;
   }
+  
   treino(tempo > 0) {
     resultado(tempo);
     tempo = tempo - 1;
   }
+  
   praticar_ate(melhora() >= 80) {
     registrar(ler_sensor("forca"), tempo);
   }
+  
   consultas = calcular_consultas(peso, altura, sessoes);
   resultado(consultas);
 }

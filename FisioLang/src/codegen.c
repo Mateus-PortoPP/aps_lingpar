@@ -33,6 +33,11 @@ static void cg_node(AST *n, InstrArray *ia) {
     case NODE_EXPR_INT:
         cg_emit(ia, OP_PUSH_INT, n->intval);
         break;
+    case NODE_STRING:
+        // Tratar strings como inteiros 0 para simplificar
+        // Em uma implementação real, seria necessário ter suporte a strings na VM
+        cg_emit(ia, OP_PUSH_INT, 0);
+        break;
     case NODE_EXPR_VAR:
         cg_emit_str(ia, OP_LOAD_VAR, n->text);
         break;

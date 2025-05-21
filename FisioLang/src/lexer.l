@@ -4,6 +4,7 @@
 #include "parser.tab.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 %}
 
 DIGIT   [0-9]
@@ -61,7 +62,7 @@ WS      [ \t\r\n]+
                       }
 
 {WS}                 { /* ignorar espaços */ }
-\/\/[^\n]*           { /* ignorar comentários de linha */ }
+\/\/[^\n]*\n         { /* ignorar comentários de linha */ }
 \/\*([^*]|\*+[^*/])*\*+\/ { /* ignorar comentários em bloco */ }
 
 .                    { fprintf(stderr, "Caractere inesperado: %c\n", *yytext); }

@@ -1,9 +1,7 @@
 sessao {
   /* Este é um comentário que será ignorado pelo compilador */
-  
   x = 10;
   y = 20;
-  
   resultado(x + y);
   
   se melhorou(x > 5) {
@@ -11,12 +9,9 @@ sessao {
   } caso contrario {
     resultado(200);
   }
-  
   importar_dados("../examples/physical_therapy_exercises.csv");
-  
   valor = ler_sensor("amplitude");
   resultado(valor);
-  
   m = melhora();
   resultado(m);
   
@@ -28,3 +23,5 @@ sessao {
   pausa(2);
 }
 fim_sessao
+
+

@@ -15,7 +15,6 @@ void yyerror(const char *s) {
 }
 %}
 
-%debug
 %define parse.error verbose
 
 %union {
@@ -108,6 +107,11 @@ stmt:
 
 expr:
       INTEGER                  { $$ = new_int_node($1); }
+    | STRING                   {
+          AST *n = new_node(NODE_STRING);
+          n->text = $1;         /* pega ownership de $1, sem duplicar */
+          $$ = n;
+      }
     | IDENTIFIER               {
           AST *n = new_node(NODE_EXPR_VAR);
           n->text = $1;         /* pega ownership de $1, sem duplicar */
@@ -156,7 +160,15 @@ arg_list:
 
 AST *parse_file(const char *path) {
     yyin = fopen(path, "r");
-    if (!yyin) { perror("fopen"); exit(1); }
+    if (!yyin) { 
+        perror("fopen"); 
+        exit(1); 
+    }
+    
+    // Voltar ao início do arquivo
+    rewind(yyin);
+    
+    // A configuração de debug foi removida para obter uma saída mais limpa
     yyparse();
     fclose(yyin);
     return ast_root;

@@ -1,0 +1,24 @@
+sessao {
+
+
+    /* importando dados do dataset e printando as medias de cada categoria*/
+
+  importar_dados("../examples/physical_therapy_exercises.csv");
+  
+  amplitude = ler_sensor("amplitude");
+  resultado(amplitude);
+  
+  
+  forca = ler_sensor("forca");
+  resultado(forca);
+  
+  accel_x = ler_sensor("accel_x");
+  resultado(accel_x);
+  
+  accel_y = ler_sensor("accel_y");
+  resultado(accel_y);
+  
+  accel_z = ler_sensor("accel_z");
+  resultado(accel_z);
+}
+fim_sessao

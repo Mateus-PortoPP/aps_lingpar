@@ -1,0 +1,13 @@
+sessao {
+  paciente { 
+    peso = 75; 
+    altura = 170; 
+    lesao = "joelho"; 
+    sessoes = 5; 
+  }
+  
+  importar_dados("../examples/physical_therapy_exercises.csv");
+  
+  resultado(42);
+}
+fim_sessao

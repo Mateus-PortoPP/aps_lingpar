@@ -18,7 +18,8 @@ typedef enum {
     NODE_EXPR_BINOP,
     NODE_MELHORA,
     NODE_LER_SENSOR,
-    NODE_CALC_CONSULTAS
+    NODE_CALC_CONSULTAS,
+    NODE_STRING
 } NodeType;
 
 typedef enum {
